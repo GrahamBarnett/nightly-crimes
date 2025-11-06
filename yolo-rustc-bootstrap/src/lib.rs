@@ -8,9 +8,18 @@ pub fn do_crimes(_: proc_macro::TokenStream) -> proc_macro::TokenStream {
                 .unwrap()
                 .stdout,
         )
-        .unwrap();
+        .expect("version failed");
         let version = version.split(' ').nth(1).unwrap();
-        let trick = !version.ends_with("-nightly");
+        let mut trick = !version.ends_with("-nightly");
+
+        let mut args = std::env::args_os();
+        let exe = args.next().expect("get first arg");
+        let mut args: Vec<std::ffi::OsString> = args.collect();
+
+        let rust_analyzer = exe.clone().into_string().unwrap().ends_with("rust-analyzer-proc-macro-srv");
+        if trick && rust_analyzer {
+            trick = false;
+        }
 
         if trick {
             println!("\x1b[1;32m   Hijacking\x1b[m this rustc process");
@@ -27,18 +36,44 @@ pub fn do_crimes(_: proc_macro::TokenStream) -> proc_macro::TokenStream {
             }
         }
 
-        let mut args = std::env::args_os();
-        let status = std::process::Command::new(args.next().unwrap())
-            .arg("--cfg=yolo_rustc_bootstrap")
-            .args(args)
-            .env("RUSTC_BOOTSTRAP", "1")
-            .status()
-            .unwrap();
+        let mut cmd = std::process::Command::new(&exe);
+        let status = if rust_analyzer {
+            cmd.args(args).env("RUSTC_BOOTSTRAP", "1");
 
-        if trick && status.success() {
-            println!("\x1b[1;32m    Finished\x1b[m the dirty work");
-            println!("\x1b[1;32m      Hiding\x1b[m all the evidence");
-            println!("\x1b[1;32m  Continuing\x1b[m as if nothing happened");
+            println!("\x1b[1;32m    Skipping cmd: {:?}", cmd);
+
+            return Default::default()
+        } else if !trick {
+            cmd.args(args).env("RUSTC_BOOTSTRAP", "1");
+
+            println!("\x1b[1;32m    Running cmd: {:?}", cmd);
+
+            cmd.status().unwrap()
+        } else {
+            let mut insert_at = 0;
+            for (idx, a) in args.iter().enumerate() {
+                if a.clone().into_string().unwrap().starts_with("--") {
+                    insert_at = idx;
+                    break;
+                }
+            }
+            args.insert(insert_at, "--check-cfg=cfg(yolo_rustc_bootstrap)".into());
+            args.insert(insert_at, "--cfg=yolo_rustc_bootstrap".into());
+            cmd.args(args).env("RUSTC_BOOTSTRAP", "1");
+
+            println!("\x1b[1;32m    Running trick cmd: {:?}", cmd);
+
+            cmd.status().unwrap()
+        };
+
+        if trick {
+            if status.success() {
+                println!("\x1b[1;32m    Finished\x1b[m the dirty work");
+                println!("\x1b[1;32m      Hiding\x1b[m all the evidence");
+                println!("\x1b[1;32m  Continuing\x1b[m as if nothing happened");
+            } else {
+                println!("\x1b[1;33m    Finished cmd {:?} with error {:?}", std::env::args_os(), status);
+            }
         }
 
         std::process::exit(status.code().unwrap_or(101));

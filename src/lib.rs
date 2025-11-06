@@ -1,4 +1,5 @@
 #![no_std]
+#![allow(internal_features)]
 #![cfg_attr(yolo_rustc_bootstrap, feature(allow_internal_unstable))]
 
 yolo_rustc_bootstrap::do_crimes!();
