@@ -56,7 +56,7 @@ pub fn do_crimes(_: proc_macro::TokenStream) -> proc_macro::TokenStream {
         if !status.success() {
             println!("\x1b[1;33m    Finished cmd {:?} with error {:?}", std::env::args_os(), status);
         }
-        else if trick && status.success() {
+        else if trick {
             println!("\x1b[1;32m    Finished\x1b[m the dirty work");
             println!("\x1b[1;32m      Hiding\x1b[m all the evidence");
             println!("\x1b[1;32m  Continuing\x1b[m as if nothing happened");
