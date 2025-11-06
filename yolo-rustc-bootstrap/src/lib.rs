@@ -46,7 +46,7 @@ pub fn do_crimes(_: proc_macro::TokenStream) -> proc_macro::TokenStream {
         } else if !trick {
             cmd.args(args).env("RUSTC_BOOTSTRAP", "1");
 
-            println!("\x1b[1;32m    Running cmd: {:?}", cmd);
+            // println!("\x1b[1;32m    Running cmd: {:?}", cmd);
 
             cmd.status().unwrap()
         } else {
