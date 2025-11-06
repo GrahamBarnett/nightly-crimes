@@ -1,12 +1,12 @@
 [package]
 name = "nightly-crimes"
 description = "Please do not use this."
-version = "1.0.2"
-edition = "2018"
+version = "1.0.3"
+edition = "2024"
 license = "BSD-2-Clause"
 repository = "https://github.com/m-ou-se/nightly-crimes"
 
 [dependencies]
-yolo-rustc-bootstrap = { version = "1.0.0", path = "yolo-rustc-bootstrap" }
+yolo-rustc-bootstrap = { version = "1.0.3", path = "yolo-rustc-bootstrap" }
 
 [workspace]
