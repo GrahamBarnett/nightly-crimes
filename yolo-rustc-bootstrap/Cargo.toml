@@ -7,4 +7,4 @@ license = "BSD-2-Clause"
 repository = "https://github.com/m-ou-se/nightly-crimes"
 
 [lib]
-proc_macro = true
+proc-macro = true
